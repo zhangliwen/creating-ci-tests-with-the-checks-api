@@ -23,3 +23,4 @@ To run the code, make sure you have [Bundler](http://gembundler.com/) installed;
 ## Test
 1. test check
 2. test check2
+3. test check3
