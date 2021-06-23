@@ -31,3 +31,4 @@ To run the code, make sure you have [Bundler](http://gembundler.com/) installed;
 8. timeout1
 9. test check8
 10. proxy
+11. proxy2
