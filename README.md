@@ -28,4 +28,5 @@ To run the code, make sure you have [Bundler](http://gembundler.com/) installed;
 5. test check5
 6. test check6
 7. test check7
-8. test check8
+8. timeout1
+9. test check8
