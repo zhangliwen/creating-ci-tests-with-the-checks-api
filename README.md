@@ -32,3 +32,4 @@ To run the code, make sure you have [Bundler](http://gembundler.com/) installed;
 9. test check8
 10. proxy
 11. proxy2
+12. test12
