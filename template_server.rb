@@ -199,6 +199,7 @@ class GHAapp < Sinatra::Application
           end
         end
       end
+      logger.debug "---- annotations #{annotations}"
 
       # Updated check run summary and text parameters
       summary = "Octo RuboCop summary\n-Offense count: #{@output['summary']['offense_count']}\n-File count: #{@output['summary']['target_file_count']}\n-Target file count: #{@output['summary']['inspected_file_count']}"
