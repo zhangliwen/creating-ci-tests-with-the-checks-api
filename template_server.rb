@@ -185,8 +185,6 @@ class GHAapp < Sinatra::Application
               path: file_path,
               start_line: start_line,
               end_line: end_line,
-              start_column: start_column,
-              end_column: end_column,
               annotation_level: annotation_level,
               message: message
             }
