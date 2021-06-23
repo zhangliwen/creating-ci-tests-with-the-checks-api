@@ -142,6 +142,13 @@ class GHAapp < Sinatra::Application
 
       clone_repository(full_repo_name, repository, head_sha)
 
+      # Run RuboCop on all files in the repository
+      @report = `rubocop '#{repository}' --format json`
+      logger.debug @report
+      `rm -rf #{repository}`
+      @output = JSON.parse @report
+      logger.debug "---- RuboCop @output #{@output}"
+
       # Mark the check run as complete!
       @installation_client.update_check_run(
         @payload['repository']['full_name'],
