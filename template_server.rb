@@ -209,7 +209,7 @@ class GHAapp < Sinatra::Application
         @payload['repository']['full_name'],
         @payload['check_run']['id'],
         status: 'completed',
-        conclusion: conclusion,
+        conclusion: 'failure',
         # conclusion: 'success',
         output: {
           title: 'Octo RuboCop',
