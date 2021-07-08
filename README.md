@@ -22,3 +22,4 @@ To run the code, make sure you have [Bundler](http://gembundler.com/) installed;
 
 fork test
 test2
+test3
