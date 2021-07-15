@@ -12,7 +12,6 @@ set :port, 3000
 set :bind, '0.0.0.0'
 
 class GHAapp < Sinatra::Application
-
   # Converts the newlines. Expects that the private key has been set as an
   # environment variable in PEM format.
   PRIVATE_KEY = OpenSSL::PKey::RSA.new(ENV['GITHUB_PRIVATE_KEY'].gsub('\n', "\n"))
@@ -28,7 +27,6 @@ class GHAapp < Sinatra::Application
   configure :development do
     set :logging, Logger::DEBUG
   end
-
 
   # Executed before each request to the `/event_handler` route
   before '/event_handler' do
@@ -49,7 +47,6 @@ class GHAapp < Sinatra::Application
     # Authenticate the app installation in order to run API operations
     authenticate_installation(@payload)
   end
-
 
   post '/event_handler' do
     # Get the event type from the HTTP_X_GITHUB_EVENT header
@@ -78,9 +75,7 @@ class GHAapp < Sinatra::Application
     200 # success status
   end
 
-
   helpers do
-
     # Create a new check run with the status queued
     def create_check_run
       # At the time of writing, Octokit does not support the Checks API, but
@@ -88,14 +83,12 @@ class GHAapp < Sinatra::Application
       # https://developer.github.com/v3/checks/runs/#create-a-check-run
       check_run = @installation_client.post(
         "repos/#{@payload['repository']['full_name']}/check-runs",
-        {
-          # This header allows for beta access to Checks API
-          accept: 'application/vnd.github.antiope-preview+json',
-          # The name of your check run.
-          name: 'Octo RuboCop',
-          # The payload structure differs depending on whether a check run or a check suite event occurred.
-          head_sha: @payload['check_run'].nil? ? @payload['check_suite']['head_sha'] : @payload['check_run']['head_sha']
-        }
+        # This header allows for beta access to Checks API
+        accept: 'application/vnd.github.antiope-preview+json',
+        # The name of your check run.
+        name: 'Octo RuboCop',
+        # The payload structure differs depending on whether a check run or a check suite event occurred.
+        head_sha: @payload['check_run'].nil? ? @payload['check_suite']['head_sha'] : @payload['check_run']['head_sha']
       )
 
       # You requested the creation of a check run from GitHub. Now, you'll wait
@@ -115,12 +108,10 @@ class GHAapp < Sinatra::Application
       # https://developer.github.com/v3/checks/runs/#update-a-check-run
       updated_check_run = @installation_client.patch(
         "repos/#{@payload['repository']['full_name']}/check-runs/#{@payload['check_run']['id']}",
-        {
-          accept: 'application/vnd.github.antiope-preview+json',
-          name: 'Octo RuboCop',
-          status: 'in_progress',
-          started_at: Time.now.utc.iso8601
-        }
+        accept: 'application/vnd.github.antiope-preview+json',
+        name: 'Octo RuboCop',
+        status: 'in_progress',
+        started_at: Time.now.utc.iso8601
       )
 
       # ***** RUN A CI TEST *****
@@ -152,15 +143,15 @@ class GHAapp < Sinatra::Application
       else
         conclusion = 'neutral'
         @output['files'].each do |file|
-
           # Only parse offenses for files in this app's repository
-          file_path = file['path'].gsub(/#{repository}\//,'')
+          file_path = file['path'].gsub(/#{repository}\//, '')
           annotation_level = 'notice'
 
           # Parse each offense to get details and location
           file['offenses'].each do |offense|
             # Limit the number of annotations to 50
             next if max_annotations == 0
+
             max_annotations -= 1
 
             start_line   = offense['location']['start_line']
@@ -179,7 +170,7 @@ class GHAapp < Sinatra::Application
             }
             # Annotations only support start and end columns on the same line
             if start_line == end_line
-              annotation.merge({start_column: start_column, end_column: end_column})
+              annotation.merge(start_column: start_column, end_column: end_column)
             end
 
             annotations.push(annotation)
@@ -194,26 +185,23 @@ class GHAapp < Sinatra::Application
       # Mark the check run as complete! And if there are warnings, share them.
       updated_check_run = @installation_client.patch(
         "repos/#{@payload['repository']['full_name']}/check-runs/#{@payload['check_run']['id']}",
-        {
-          accept: 'application/vnd.github.antiope-preview+json',
-          name: 'Octo RuboCop',
-          status: 'completed',
-          conclusion: conclusion,
-          completed_at: Time.now.utc.iso8601,
-          output: {
-            title: 'Octo RuboCop',
-            summary: summary,
-            text: text,
-            annotations: annotations
-          },
-          actions: [{
-            label: 'Fix this',
-            description: 'Automatically fix all linter notices.',
-            identifier: 'fix_rubocop_notices'
-          }]
-        }
+        accept: 'application/vnd.github.antiope-preview+json',
+        name: 'Octo RuboCop',
+        status: 'completed',
+        conclusion: conclusion,
+        completed_at: Time.now.utc.iso8601,
+        output: {
+          title: 'Octo RuboCop',
+          summary: summary,
+          text: text,
+          annotations: annotations
+        },
+        actions: [{
+          label: 'Fix this',
+          description: 'Automatically fix all linter notices.',
+          identifier: 'fix_rubocop_notices'
+        }]
       )
-
     end
 
     # Handles the check run `requested_action` event
@@ -223,7 +211,7 @@ class GHAapp < Sinatra::Application
       repository     = @payload['repository']['name']
       head_branch    = @payload['check_run']['check_suite']['head_branch']
 
-      if (@payload['requested_action']['identifier'] == 'fix_rubocop_notices')
+      if @payload['requested_action']['identifier'] == 'fix_rubocop_notices'
         clone_repository(full_repo_name, repository, head_branch)
 
         # Sets your commit username and email address
@@ -233,12 +221,12 @@ class GHAapp < Sinatra::Application
         # Automatically correct RuboCop style errors
         @report = `rubocop '#{repository}/*' --format json --auto-correct`
 
-        pwd = Dir.getwd()
+        pwd = Dir.getwd
         Dir.chdir(repository)
         begin
           @git.commit_all('Automatically fix Octo RuboCop notices.')
-          @git.push("https://x-access-token:#{@installation_token.to_s}@github.com/#{full_repo_name}.git", head_branch)
-        rescue
+          @git.push("https://x-access-token:#{@installation_token}@github.com/#{full_repo_name}.git", head_branch)
+        rescue StandardError
           # Nothing to commit!
           puts 'Nothing to commit'
         end
@@ -254,8 +242,8 @@ class GHAapp < Sinatra::Application
     # repository      - The repository name
     # ref             - The branch, commit SHA, or tag to check out
     def clone_repository(full_repo_name, repository, ref)
-      @git = Git.clone("https://x-access-token:#{@installation_token.to_s}@github.com/#{full_repo_name}.git", repository)
-      pwd = Dir.getwd()
+      @git = Git.clone("https://x-access-token:#{@installation_token}@github.com/#{full_repo_name}.git", repository)
+      pwd = Dir.getwd
       Dir.chdir(repository)
       @git.pull
       @git.checkout(ref)
@@ -271,8 +259,8 @@ class GHAapp < Sinatra::Application
       @payload_raw = request.body.read
       begin
         @payload = JSON.parse @payload_raw
-      rescue => e
-        fail  "Invalid JSON (#{e}): #{@payload_raw}"
+      rescue StandardError => e
+        raise "Invalid JSON (#{e}): #{@payload_raw}"
       end
     end
 
@@ -283,14 +271,14 @@ class GHAapp < Sinatra::Application
     # a malicious third party.
     def authenticate_app
       payload = {
-          # The time that this JWT was issued, _i.e._ now.
-          iat: Time.now.to_i,
+        # The time that this JWT was issued, _i.e._ now.
+        iat: Time.now.to_i,
 
-          # JWT expiration time (10 minute maximum)
-          exp: Time.now.to_i + (10 * 60),
+        # JWT expiration time (10 minute maximum)
+        exp: Time.now.to_i + (10 * 60),
 
-          # Your GitHub App's identifier number
-          iss: APP_IDENTIFIER
+        # Your GitHub App's identifier number
+        iss: APP_IDENTIFIER
       }
 
       # Cryptographically sign the JWT.
@@ -330,7 +318,6 @@ class GHAapp < Sinatra::Application
       logger.debug "---- received event #{request.env['HTTP_X_GITHUB_EVENT']}"
       logger.debug "----    action #{@payload['action']}" unless @payload['action'].nil?
     end
-
   end
 
   # Finally some logic to let us run this server directly from the command line,
@@ -339,5 +326,5 @@ class GHAapp < Sinatra::Application
   # __FILE__ is the current file
   # If they are the same—that is, we are running this file directly, call the
   # Sinatra run method
-  run! if __FILE__ == $0
+  run! if $PROGRAM_NAME == __FILE__
 end
