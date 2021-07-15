@@ -78,6 +78,8 @@ class GHAapp < Sinatra::Application
           initiate_check_run
         when 'rerequested'
           create_check_run
+        when 'requested_action'
+          take_requested_action
         end
       end
     end
@@ -224,6 +226,37 @@ class GHAapp < Sinatra::Application
         }],
         accept: 'application/vnd.github.v3+json'
       )
+    end
+
+    # Handles the check run `requested_action` event
+    # See /webhooks/event-payloads/#check_run
+    def take_requested_action
+      full_repo_name = @payload['repository']['full_name']
+      repository     = @payload['repository']['name']
+      head_branch    = @payload['check_run']['check_suite']['head_branch']
+
+      if (@payload['requested_action']['identifier'] == 'fix_rubocop_notices')
+        clone_repository(full_repo_name, repository, head_branch)
+
+        # Sets your commit username and email address
+        @git.config('user.name', ENV['GITHUB_APP_USER_NAME'])
+        @git.config('user.email', ENV['GITHUB_APP_USER_EMAIL'])
+
+        # Automatically correct RuboCop style errors
+        @report = `rubocop '#{repository}/*' --format json --auto-correct`
+
+        pwd = Dir.getwd()
+        Dir.chdir(repository)
+        begin
+          @git.commit_all('Automatically fix Octo RuboCop notices.')
+          @git.push("https://x-access-token:#{@installation_token.to_s}@github.com/#{full_repo_name}.git", head_branch)
+        rescue
+          # Nothing to commit!
+          puts 'Nothing to commit'
+        end
+        Dir.chdir(pwd)
+        `rm -rf '#{repository}'`
+      end
     end
 
     # Saves the raw payload and converts the payload to JSON format
