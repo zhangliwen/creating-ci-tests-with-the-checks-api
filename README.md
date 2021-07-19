@@ -41,3 +41,4 @@ To run the code, make sure you have [Bundler](http://gembundler.com/) installed;
 18. test 18
 19. test 19
 20. test 20
+21. change checks
