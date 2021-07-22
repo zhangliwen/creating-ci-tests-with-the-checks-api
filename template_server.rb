@@ -154,7 +154,7 @@ class GHAapp < Sinatra::Application
       if @output['summary']['offense_count'] == 0
         conclusion = 'success'
       else
-        conclusion = 'neutral'
+        conclusion = 'success'
         # conclusion = 'failure'
         @output['files'].each do |file|
           # Only parse offenses for files in this app's repository
