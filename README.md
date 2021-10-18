@@ -44,3 +44,4 @@ To run the code, make sure you have [Bundler](http://gembundler.com/) installed;
 21. change checks
 22. 1018
 23. 1018-2
+24. 1018-3
