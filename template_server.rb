@@ -47,7 +47,6 @@ class GHAapp < Sinatra::Application
 
   # Before each request to the `/event_handler` route
   before '/event_handler' do
-    logger.debug "event_handler"
     get_payload_request(request)
     verify_webhook_signature
     authenticate_app
@@ -105,6 +104,7 @@ class GHAapp < Sinatra::Application
 
     # Create a new check run with the status queued
     def create_check_run
+      logger.debug "---- create check run status: liwen_1018_dingding"
       @installation_client.create_check_run(
         # [String, Integer, Hash, Octokit Repository object] A GitHub repository.
         # @payload['repository']['full_name'],
