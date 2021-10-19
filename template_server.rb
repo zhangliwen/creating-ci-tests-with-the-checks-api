@@ -7,6 +7,7 @@ require 'jwt'         # Authenticates a GitHub App
 require 'time'        # Gets ISO 8601 representation of a Time object
 require 'logger'      # Logs debug statements
 require 'git'
+require 'pry'
 
 set :port, 3000
 set :bind, '0.0.0.0'
@@ -104,6 +105,7 @@ class GHAapp < Sinatra::Application
 
     # Create a new check run with the status queued
     def create_check_run
+      binding.pry
       @installation_client.create_check_run(
         # [String, Integer, Hash, Octokit Repository object] A GitHub repository.
         # @payload['repository']['full_name'],
@@ -125,6 +127,7 @@ class GHAapp < Sinatra::Application
       # to 'in_progress' and run the CI process. When the CI finishes, you'll
       # update the check run status to 'completed' and add the CI results.
 
+      binding.pry
       @installation_client.update_check_run(
         'zhangliwen/creating-ci-tests-with-the-checks-api',
         @payload['check_run']['id'],
@@ -252,6 +255,7 @@ class GHAapp < Sinatra::Application
     # Handles the check run `requested_action` event
     # See /webhooks/event-payloads/#check_run
     def take_requested_action
+      binding.pry
       full_repo_name = @payload['repository']['full_name']
       repository     = @payload['repository']['name']
       head_branch    = @payload['check_run']['check_suite']['head_branch']
