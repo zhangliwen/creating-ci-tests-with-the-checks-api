@@ -46,7 +46,7 @@ class GHAapp < Sinatra::Application
 
   # Before each request to the `/event_handler` route
   before '/event_handler' do
-    logger.debug 'event_handler'
+    logger.debug "event_handler"
     get_payload_request(request)
     verify_webhook_signature
     authenticate_app
@@ -240,7 +240,7 @@ class GHAapp < Sinatra::Application
           label: 'Fix this',
           description: 'Automatically fix all linter notices.',
           identifier: 'fix_rubocop_notices'
-        }, {
+        },{
           label: '跳过',
           description: 'Automatically fix all linter notices.',
           identifier: 'fix_'
