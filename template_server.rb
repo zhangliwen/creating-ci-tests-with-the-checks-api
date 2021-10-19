@@ -46,6 +46,7 @@ class GHAapp < Sinatra::Application
 
   # Before each request to the `/event_handler` route
   before '/event_handler' do
+    logger.debug "event_handler"
     get_payload_request(request)
     verify_webhook_signature
     authenticate_app
@@ -105,12 +106,14 @@ class GHAapp < Sinatra::Application
     def create_check_run
       @installation_client.create_check_run(
         # [String, Integer, Hash, Octokit Repository object] A GitHub repository.
-        @payload['repository']['full_name'],
+        # @payload['repository']['full_name'],
+        'zhangliwen/creating-ci-tests-with-the-checks-api',
         # [String] The name of your check run.
-        'Octo RuboCop',
+        'liwen_1018_dingding',
         # [String] The SHA of the commit to check
         # The payload structure differs depending on whether a check run or a check suite event occurred.
         @payload['check_run'].nil? ? @payload['check_suite']['head_sha'] : @payload['check_run']['head_sha'],
+        # 'bf8b164c58cfdffc36cc5de1ce62a570a6e65939',
         # [Hash] 'Accept' header option, to avoid a warning about the API not being ready for production use.
         accept: 'application/vnd.github.v3+json'
       )
@@ -123,8 +126,9 @@ class GHAapp < Sinatra::Application
       # update the check run status to 'completed' and add the CI results.
 
       @installation_client.update_check_run(
-        @payload['repository']['full_name'],
+        'zhangliwen/creating-ci-tests-with-the-checks-api',
         @payload['check_run']['id'],
+        # '3699392529',
         status: 'in_progress',
         accept: 'application/vnd.github.v3+json'
       )
@@ -199,21 +203,44 @@ class GHAapp < Sinatra::Application
 
       # Mark the check run as complete! And if there are warnings, share them.
       @installation_client.update_check_run(
-        @payload['repository']['full_name'],
+        # @payload['repository']['full_name'],
+        'zhangliwen/creating-ci-tests-with-the-checks-api',
         @payload['check_run']['id'],
-        status: 'completed',
-        conclusion: 'failure',
-        # conclusion: 'success',
+        # '3699392529',
+        # status: 'completed',
+        # conclusion: 'action_required',
+        # conclusion: 'cancelled',
+        # conclusion: 'failure',
+        # conclusion: 'neutral',
+        conclusion: 'success',
+        # conclusion: 'skipped',
+        # conclusion: 'stale',
+        # conclusion: 'timed_out',
+        details_url: 'https://gitee.com/liwen',
         output: {
           title: 'Octo RuboCop',
-          summary: summary,
-          text: text,
-          annotations: annotations
+          summary: '总结，旧的3217823498',
+          text: '3217823498',
+          annotations: [
+            {
+              path: '.env-example',
+              start_line: 10,
+              end_line: 12,
+              annotation_level: 'notice',
+              message: '必填。对这几行代码的反馈的简短描述',
+              title: '阳杨喊我去吃饭',
+              raw_details: '注释的详细信息'
+            }
+          ]
         },
         actions: [{
           label: 'Fix this',
           description: 'Automatically fix all linter notices.',
           identifier: 'fix_rubocop_notices'
+        },{
+          label: '跳过',
+          description: 'Automatically fix all linter notices.',
+          identifier: 'fix_'
         }],
         accept: 'application/vnd.github.v3+json'
       )
@@ -285,13 +312,15 @@ class GHAapp < Sinatra::Application
       jwt = JWT.encode(payload, PRIVATE_KEY, 'RS256')
 
       # Create the Octokit client, using the JWT as the auth token.
-      @app_client ||= Octokit::Client.new(bearer_token: jwt, proxy: 'http://127.0.0.1:7890')
+      @app_client = Octokit::Client.new(bearer_token: jwt, proxy: 'http://127.0.0.1:7890')
     end
 
     # Instantiate an Octokit client, authenticated as an installation of a
     # GitHub App, to run API operations.
     def authenticate_installation(payload)
       @installation_id = payload['installation']['id']
+      @installation_id = 18252116 # liwen8-smee     #app_slug
+      # @installation_id = 17778642 # smee-check-ci
       @installation_token = @app_client.create_app_installation_access_token(@installation_id)[:token]
       @installation_client = Octokit::Client.new(bearer_token: @installation_token, proxy: 'http://127.0.0.1:7890')
     end
