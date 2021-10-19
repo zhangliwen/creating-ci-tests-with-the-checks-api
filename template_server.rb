@@ -219,19 +219,21 @@ class GHAapp < Sinatra::Application
         details_url: 'https://gitee.com/liwen',
         output: {
           title: 'Octo RuboCop',
-          summary: '总结，旧的3217823498',
-          text: '3217823498',
-          annotations: [
-            {
-              path: '.env-example',
-              start_line: 10,
-              end_line: 12,
-              annotation_level: 'notice',
-              message: '必填。对这几行代码的反馈的简短描述',
-              title: '阳杨喊我去吃饭',
-              raw_details: '注释的详细信息'
-            }
-          ]
+          text: text,
+          annotations: annotations
+          # summary: '总结，旧的3217823498',
+          # text: '3217823498',
+          # annotations: [
+          #   {
+          #     path: '.env-example',
+          #     start_line: 10,
+          #     end_line: 12,
+          #     annotation_level: 'notice',
+          #     message: '必填。对这几行代码的反馈的简短描述',
+          #     title: '阳杨喊我去吃饭',
+          #     raw_details: '注释的详细信息'
+          #   }
+          # ]
         },
         actions: [{
           label: 'Fix this',
