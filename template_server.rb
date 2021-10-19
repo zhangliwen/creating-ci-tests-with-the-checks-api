@@ -219,6 +219,7 @@ class GHAapp < Sinatra::Application
         details_url: 'https://gitee.com/liwen',
         output: {
           title: 'Octo RuboCop',
+          summary: summary,
           text: text,
           annotations: annotations
           # summary: '总结，旧的3217823498',
