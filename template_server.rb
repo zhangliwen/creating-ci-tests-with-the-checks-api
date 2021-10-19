@@ -105,7 +105,6 @@ class GHAapp < Sinatra::Application
 
     # Create a new check run with the status queued
     def create_check_run
-      binding.pry
       @installation_client.create_check_run(
         # [String, Integer, Hash, Octokit Repository object] A GitHub repository.
         # @payload['repository']['full_name'],
@@ -127,7 +126,7 @@ class GHAapp < Sinatra::Application
       # to 'in_progress' and run the CI process. When the CI finishes, you'll
       # update the check run status to 'completed' and add the CI results.
 
-      binding.pry
+      logger.debug "---- set check run status: in_progress"
       @installation_client.update_check_run(
         'zhangliwen/creating-ci-tests-with-the-checks-api',
         @payload['check_run']['id'],
@@ -145,7 +144,6 @@ class GHAapp < Sinatra::Application
 
       # Run RuboCop on all files in the repository
       @report = `rubocop '#{repository}' --format json`
-      logger.debug @report
       `rm -rf #{repository}`
       @output = JSON.parse @report
 
@@ -198,13 +196,13 @@ class GHAapp < Sinatra::Application
           end
         end
       end
-      logger.debug "---- annotations #{annotations}"
 
       # Updated check run summary and text parameters
       summary = "Octo RuboCop summary\n-Offense count: #{@output['summary']['offense_count']}\n-File count: #{@output['summary']['target_file_count']}\n-Target file count: #{@output['summary']['inspected_file_count']}"
       text = "Octo RuboCop version: #{@output['metadata']['rubocop_version']}"
 
       # Mark the check run as complete! And if there are warnings, share them.
+      logger.debug "----     set check run status: completed"
       @installation_client.update_check_run(
         # @payload['repository']['full_name'],
         'zhangliwen/creating-ci-tests-with-the-checks-api',
@@ -255,7 +253,6 @@ class GHAapp < Sinatra::Application
     # Handles the check run `requested_action` event
     # See /webhooks/event-payloads/#check_run
     def take_requested_action
-      binding.pry
       full_repo_name = @payload['repository']['full_name']
       repository     = @payload['repository']['name']
       head_branch    = @payload['check_run']['check_suite']['head_branch']
