@@ -319,7 +319,7 @@ class GHAapp < Sinatra::Application
     # GitHub App, to run API operations.
     def authenticate_installation(payload)
       @installation_id = payload['installation']['id']
-      @installation_id = 18252116 # liwen8-smee     #app_slug
+      # @installation_id = 18252116 # liwen8-smee     #app_slug
       # @installation_id = 17778642 # smee-check-ci
       @installation_token = @app_client.create_app_installation_access_token(@installation_id)[:token]
       @installation_client = Octokit::Client.new(bearer_token: @installation_token, proxy: 'http://127.0.0.1:7890')
